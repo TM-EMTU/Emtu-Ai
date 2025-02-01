@@ -131,3 +131,12 @@ if user_query:
 
     # Rerun to update chat display
     st.rerun()
+import requests
+
+url = "http://localhost:11434/api/tags"  # Change to your remote IP if needed
+
+try:
+    response = requests.get(url)
+    print("Ollama is running:", response.json())
+except requests.exceptions.ConnectionError:
+    print("❌ ERROR: Ollama server is not running or unreachable.")
