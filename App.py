@@ -96,15 +96,12 @@ with chat_container:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-# Process user input and generate AI response
-user_query = st.chat_input("Type your question here...")
+# Chat input and processing
+user_query = st.chat_input("Type your coding question here...")
 
 def generate_ai_response(prompt_chain):
-    try:
-        processing_pipeline = prompt_chain | llm_engine | StrOutputParser()
-        return processing_pipeline.invoke({})
-    except httpx.ConnectError:
-        return "⚠️ Connection error: Unable to reach the AI model. Please check if Ollama is running."
+    processing_pipeline=prompt_chain | llm_engine | StrOutputParser()
+    return processing_pipeline.invoke({})
 
 def build_prompt_chain():
     prompt_sequence = [system_prompt]
@@ -115,18 +112,17 @@ def build_prompt_chain():
             prompt_sequence.append(AIMessagePromptTemplate.from_template(msg["content"]))
     return ChatPromptTemplate.from_messages(prompt_sequence)
 
-# Handle user input and AI response
 if user_query:
-    # Add user query to message log
+    # Add user message to log
     st.session_state.message_log.append({"role": "user", "content": user_query})
-
+    
     # Generate AI response
     with st.spinner("🧠 Processing..."):
         prompt_chain = build_prompt_chain()
         ai_response = generate_ai_response(prompt_chain)
-
-    # Add AI response to message log
+    
+    # Add AI response to log
     st.session_state.message_log.append({"role": "ai", "content": ai_response})
-
+    
     # Rerun to update chat display
     st.rerun()
