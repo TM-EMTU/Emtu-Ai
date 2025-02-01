@@ -66,10 +66,11 @@ with st.sidebar:
     st.divider()
     st.markdown("Created by Tanjil Mahmud Emtu")
 
-# Initialize the chat engine
-llm_engine = ChatOllama(
+# initiate the chat engine
+llm_engine=ChatOllama(
     model=selected_model,
-    base_url="http://localhost:11434",  # Fixed missing quote
+    base_url="http://localhost:11434",
+
     temperature=0.3
 )
 
@@ -89,15 +90,17 @@ system_prompt = SystemMessagePromptTemplate.from_template(
 if "message_log" not in st.session_state:
     st.session_state.message_log = [{"role": "ai", "content": "Hi! I am Emtu AI. How can I help you?"}]
 
-# Display chat container
+# Chat container
 chat_container = st.container()
+
+# Display chat messages
 with chat_container:
     for message in st.session_state.message_log:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
 # Chat input and processing
-user_query = st.chat_input("Type your coding question here...")
+user_query = st.chat_input("Type your question here...")
 
 def generate_ai_response(prompt_chain):
     processing_pipeline=prompt_chain | llm_engine | StrOutputParser()
