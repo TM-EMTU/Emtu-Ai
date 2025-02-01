@@ -7,6 +7,7 @@ from langchain_core.prompts import (
     AIMessagePromptTemplate,
     ChatPromptTemplate
 )
+import httpx
 
 # Apply custom styles for the app
 st.markdown("""
@@ -69,7 +70,7 @@ with st.sidebar:
 # Initialize the chat engine
 llm_engine = ChatOllama(
     model=selected_model,
-    base_url="http://localhost:11434,  # Fixed the typo
+    base_url="http://localhost:11434",  # Fixed missing quote
     temperature=0.3
 )
 
@@ -100,8 +101,11 @@ with chat_container:
 user_query = st.chat_input("Type your question here...")
 
 def generate_ai_response(prompt_chain):
-    processing_pipeline = prompt_chain | llm_engine | StrOutputParser()
-    return processing_pipeline.invoke({})
+    try:
+        processing_pipeline = prompt_chain | llm_engine | StrOutputParser()
+        return processing_pipeline.invoke({})
+    except httpx.ConnectError:
+        return "⚠️ Connection error: Unable to reach the AI model. Please check if Ollama is running."
 
 def build_prompt_chain():
     prompt_sequence = [system_prompt]
