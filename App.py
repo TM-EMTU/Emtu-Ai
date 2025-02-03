@@ -69,7 +69,7 @@ with st.sidebar:
 # Initialize the chat engine
 llm_engine = ChatOllama(
     model=selected_model,
-    base_url = "https://f11b-103-47-102-63.ngrok-free.app/",  # Fixed missing quote
+    base_url = "https://ac5e-103-47-102-41.ngrok-free.app",  # Fixed missing quote
     temperature=0.3
 )
 
