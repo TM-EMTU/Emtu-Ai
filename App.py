@@ -1,4 +1,5 @@
 import streamlit as st
+import httpx
 from langchain_ollama import ChatOllama
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import (
@@ -52,8 +53,7 @@ with st.sidebar:
     selected_model = st.selectbox("Choose Model", ['deepseek-r1:1.5b'], index=0)
     st.divider()
 
-    st.markdown("""
-    **🌟 What’s Next?**  
+    st.markdown(""" 
     - 🤖 Smarter AI responses  
     - ⚡ Faster performance  
     - 🔍 Improved accuracy  
@@ -62,15 +62,14 @@ with st.sidebar:
     """)
     st.divider()
 
-    st.markdown("Built with [Ollama](https://ollama.com/) | [LangChain](https://www.langchain.com/)")
+    st.markdown("Builds with [Ollama](https://ollama.com/) | [LangChain](https://www.langchain.com/)")
     st.divider()
     st.markdown("Created by Tanjil Mahmud Emtu")
 
-# initiate the chat engine
-llm_engine=ChatOllama(
+# Initialize the chat engine
+llm_engine = ChatOllama(
     model=selected_model,
-    base_url="http://localhost:11434",
-
+    base_url="http://localhost:11434",  # Fixed missing quote
     temperature=0.3
 )
 
@@ -90,21 +89,22 @@ system_prompt = SystemMessagePromptTemplate.from_template(
 if "message_log" not in st.session_state:
     st.session_state.message_log = [{"role": "ai", "content": "Hi! I am Emtu AI. How can I help you?"}]
 
-# Chat container
+# Display chat container
 chat_container = st.container()
-
-# Display chat messages
 with chat_container:
     for message in st.session_state.message_log:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-# Chat input and processing
+# Process user input and generate AI response
 user_query = st.chat_input("Type your question here...")
 
 def generate_ai_response(prompt_chain):
-    processing_pipeline=prompt_chain | llm_engine | StrOutputParser()
-    return processing_pipeline.invoke({})
+    try:
+        processing_pipeline = prompt_chain | llm_engine | StrOutputParser()
+        return processing_pipeline.invoke({})
+    except httpx.ConnectError:
+        return "⚠️ Connection error: Unable to reach the AI model. Please check if Ollama is running."
 
 def build_prompt_chain():
     prompt_sequence = [system_prompt]
@@ -115,17 +115,18 @@ def build_prompt_chain():
             prompt_sequence.append(AIMessagePromptTemplate.from_template(msg["content"]))
     return ChatPromptTemplate.from_messages(prompt_sequence)
 
+# Handle user input and AI response
 if user_query:
-    # Add user message to log
+    # Add user query to message log
     st.session_state.message_log.append({"role": "user", "content": user_query})
-    
+
     # Generate AI response
     with st.spinner("🧠 Processing..."):
         prompt_chain = build_prompt_chain()
         ai_response = generate_ai_response(prompt_chain)
-    
-    # Add AI response to log
+
+    # Add AI response to message log
     st.session_state.message_log.append({"role": "ai", "content": ai_response})
-    
+
     # Rerun to update chat display
     st.rerun()
