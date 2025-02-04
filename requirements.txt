@@ -2,3 +2,4 @@ httpx==0.28.1
 langchain_core==0.3.33
 langchain_ollama==0.2.3
 streamlit==1.41.1
+HuggingFaceHub
