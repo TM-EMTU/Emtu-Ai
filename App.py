@@ -1,6 +1,6 @@
 import streamlit as st
 import httpx
-from langchain_ollama import ChatOllama
+from langchain.llms import HuggingFaceHub
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import (
     SystemMessagePromptTemplate,
@@ -11,33 +11,33 @@ from langchain_core.prompts import (
 
 # Apply custom styles for the app
 st.markdown("""
-<style>
-    .main {
-        background-color: #1a1a1a;
-        color: #ffffff;
-    }
-    .sidebar .sidebar-content {
-        background-color: #2d2d2d;
-    }
-    .stTextInput textarea {
-        color: #ffffff !important;
-    }
-    .stSelectbox div[data-baseweb="select"] {
-        color: white !important;
-        background-color: #3d3d3d !important;
-    }
-    .stSelectbox svg {
-        fill: white !important;
-    }
-    .stSelectbox option {
-        background-color: #2d2d2d !important;
-        color: white !important;
-    }
-    div[role="listbox"] div {
-        background-color: #2d2d2d !important;
-        color: white !important;
-    }
-</style>
+    <style>
+        .main {
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .sidebar .sidebar-content {
+            background-color: #2d2d2d;
+        }
+        .stTextInput textarea {
+            color: #ffffff !important;
+        }
+        .stSelectbox div[data-baseweb="select"] {
+            color: white !important;
+            background-color: #3d3d3d !important;
+        }
+        .stSelectbox svg {
+            fill: white !important;
+        }
+        .stSelectbox option {
+            background-color: #2d2d2d !important;
+            color: white !important;
+        }
+        div[role="listbox"] div {
+            background-color: #2d2d2d !important;
+            color: white !important;
+        }
+    </style>
 """, unsafe_allow_html=True)
 
 # Set up the app title and caption
@@ -48,29 +48,27 @@ st.caption("🔥 Ask anything, get instant responses!")
 with st.sidebar:
     st.header("🚀 Welcome to Emtu ChatBot")
     st.divider()
-
     st.header("⚙️ Config")
-    selected_model = st.selectbox("Choose Model", ['deepseek-r1:1.5b'], index=0)
+    selected_model = st.selectbox("Choose Model", ['mistralai/Mistral-7B-Instruct'], index=0)  # Update to Hugging Face model
     st.divider()
 
     st.markdown(""" 
-    - 🤖 Smarter AI responses  
-    - ⚡ Faster performance  
-    - 🔍 Improved accuracy  
-    - 🌐 Multilingual support  
-    - 🎯 Personalized AI experience
+        - 🤖 Smarter AI responses  
+        - ⚡ Faster performance  
+        - 🔍 Improved accuracy  
+        - 🌐 Multilingual support  
+        - 🎯 Personalized AI experience
     """)
     st.divider()
 
-    st.markdown("Builds with [Ollama](https://ollama.com/) | [LangChain](https://www.langchain.com/)")
+    st.markdown("Built with [Hugging Face](https://huggingface.co/) | [LangChain](https://www.langchain.com/)")
     st.divider()
     st.markdown("Created by Tanjil Mahmud Emtu")
 
-# Initialize the chat engine
-llm_engine = ChatOllama(
-    model=selected_model,
-   base_url = "http://localhost:11434",  # Fixed missing quote
-    temperature=0.3
+# Initialize the chat engine (Hugging Face model)
+llm_engine = HuggingFaceHub(
+    repo_id="mistralai/Mistral-7B-Instruct",  # Replace with your desired Hugging Face model
+    huggingfacehub_api_token="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"  # Add your Hugging Face API token here
 )
 
 # System prompt configuration
@@ -82,7 +80,7 @@ system_prompt = SystemMessagePromptTemplate.from_template(
     "Always be concise, clear, and respectful in your replies. "
     "Feel free to explain concepts in simple terms if the user is a beginner. "
     "Your goal is to make sure the user gets the information they need in the best way possible. "
-    "If a user asks who created you?, simply say: 'I was created by Tanjil Mahmud Emtu, a passionate AI and programming enthusiast."
+    "If a user asks who created you?, simply say: 'I was created by Tanjil Mahmud Emtu, a passionate AI and programming enthusiast.'"
 )
 
 # Session state management to store message log
@@ -104,7 +102,7 @@ def generate_ai_response(prompt_chain):
         processing_pipeline = prompt_chain | llm_engine | StrOutputParser()
         return processing_pipeline.invoke({})
     except httpx.ConnectError:
-        return "⚠️ Connection error: Unable to reach the AI model. Please check if Ollama is running."
+        return "⚠️ Connection error: Unable to reach the AI model. Please check if the server is running."
 
 def build_prompt_chain():
     prompt_sequence = [system_prompt]
