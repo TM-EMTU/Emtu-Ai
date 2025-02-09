@@ -1,0 +1,9 @@
+{
+  "build": {
+    "dockerfilePath": "Dockerfile"
+  },
+  "deploy": {
+    "startCommand": "ollama serve",
+    "port": 11434
+  }
+}
