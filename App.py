@@ -69,7 +69,7 @@ with st.sidebar:
 # Initialize the chat engine
 llm_engine = ChatOllama(
     model=selected_model,
-    base_url="http://localhost:11434/",  # Fixed the typo
+    base_url="https://ollama-railway-production-81d8.up.railway.app",  # Fixed the typo
     temperature=0.3
 )
 
